@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /Labo03/api/
+
+# Vérifie si la requête ne correspond pas à un répertoire ou un fichier existant
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Si la requête ne correspond à aucun fichier ou répertoire, redirige vers index.php
+RewriteRule ^(.+)$ /Labo03/api/index.php [QSA,L]

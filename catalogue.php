@@ -13,7 +13,7 @@ $taille = isset($_GET['taille']) ? $_GET['taille'] : null;
 $prix_min = isset($_GET['prix_min']) ? (int) $_GET['prix_min'] : null;
 $prix_max = isset($_GET['prix_max']) ? (int) $_GET['prix_max'] : null;
 
-$produits = $productController->filterProducts($type, $couleur, $taille, $prix_min, $prix_max);
+$produits = $productController->getAllProducts();
 $productView = new ProductView();
 ?>
 
@@ -87,12 +87,54 @@ $productView = new ProductView();
       </div>
     </form>
     <div class="product-container">
-      <?php
-      $productView->displayProducts($produits);
-      ?>
+      <div id="product-list"></div>
     </div>
   </div>
   <?php include('footer.php'); ?>
 </body>
+
+<script>
+  const app = document.getElementById('product-list');
+
+  const url = '/Labo03/api/produits';
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP : ${response.status}`);
+      }
+
+      return response.text().then(text => {
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          throw new Error('La réponse n\'est pas un JSON valide');
+        }
+      });
+    })
+    .then(products => {
+      let html = '<div class="product-container">';
+      products.forEach(product => {
+        html += `
+        <div class="product-card">
+          <a href="product_detail.php?id=${product.id}">
+            <img src="${product.image}" alt="${product.name}" class="product-image" />
+            <h3>${product.name}</h3>
+            <p>${product.prix} €</p>
+          </a>
+        </div>
+      `;
+      });
+      html += '</div>';
+
+      app.innerHTML = html;
+    })
+    .catch(error => {
+      console.error('Erreur:', error);
+      app.innerHTML = `<p>Une erreur est survenue : ${error.message}</p>`;
+    });
+
+
+</script>
 
 </html>

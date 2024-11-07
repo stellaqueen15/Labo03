@@ -35,52 +35,75 @@ $randomProducts = $productController->getRandomProducts(3, $productId);
       </div>
     </div>
     <main class="page-produits-details">
-      <?php
-      if ($product) {
-        echo "<h1>{$product['name']}</h1>";
-
-        echo "<div class='product-container-details'>";
-
-        echo "<div class='product-imagess'>";
-        echo "<img id='main-image' src='{$product['image']}' alt='{$product['name']}' class='main-product-image' />";
-        echo "<div class='thumbnails'>";
-        echo "<img src='{$product['image']}' alt='{$product['name']}' class='thumbnail-image selected-thumbnail' onclick='changeImage(\"{$product['image']}\", this)' />";
-        echo "<img src='{$product['image']}' alt='{$product['name']}' class='thumbnail-image' onclick='changeImage(\"{$product['image']}\", this)' />";
-        echo "</div>";
-        echo "</div>";
-
-        echo "<div class='product-details'>";
-        echo "<p><strong>Type:</strong> {$product['type']}</p>";
-        echo "<p><strong>Couleur:</strong> {$product['couleur']}</p>";
-        echo "<p><strong>Taille:</strong> {$product['taille']}</p>";
-        echo "<p><strong>Prix:</strong> {$product['prix']} €</p>";
-        echo "<p><strong>Description:</strong> {$product['description']}</p>";
-        echo "</div>";
-
-        echo "</div>";
-
-        if ($randomProducts) {
-          echo "<h2>Vous pourriez également aimer</h2>";
-          echo "<div class='random-products'>";
-          foreach ($randomProducts as $randomProduct) {
-            echo "<div class='random-product'>";
-            echo "<a href='product_detail.php?id={$randomProduct['id']}'>";
-            echo "<img src='{$randomProduct['image']}' alt='{$randomProduct['name']}' class='random-product-image' />";
-            echo "<h3>{$randomProduct['name']}</h3>";
-            echo "<p>{$randomProduct['prix']} €</p>";
-            echo "</a>";
-            echo "</div>";
-          }
-          echo "</div>";
-        }
-      } else {
-        echo "<p>Produit non trouvé.</p>";
-      }
-      ?>
+      <div id="product-detail-container">
+      </div>
     </main>
   </div>
   <?php include('footer.php'); ?>
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (productId) {
+      fetch(`http://localhost:4208/Labo03/api/produit/${productId}`)
+        .then(response => response.json())
+        .then(product => {
+          if (product) {
+            let productDetailHTML = `
+              <h1>${product.name}</h1>
+
+              <div class="product-container-details">
+                <div class="product-imagess">
+                  <img id="main-image" src="${product.image}" alt="${product.name}" class="main-product-image" />
+                  <div class="thumbnails">
+                    <img src="${product.image}" alt="${product.name}" class="thumbnail-image selected-thumbnail" onclick="changeImage('${product.image}', this)" />
+                    <img src="${product.image}" alt="${product.name}" class="thumbnail-image" onclick="changeImage('${product.image}', this)" />
+                  </div>
+                </div>
+
+                <div class="product-details">
+                  <p><strong>Type:</strong> ${product.type}</p>
+                  <p><strong>Couleur:</strong> ${product.couleur}</p>
+                  <p><strong>Taille:</strong> ${product.taille}</p>
+                  <p><strong>Prix:</strong> ${product.prix} €</p>
+                  <p><strong>Description:</strong> ${product.description}</p>
+                </div>
+              </div>
+            `;
+
+            document.getElementById('product-detail-container').innerHTML = productDetailHTML;
+
+            if (product.randomProducts && product.randomProducts.length > 0) {
+              let randomProductsHTML = '<h2>Vous pourriez également aimer</h2><div class="random-products">';
+
+              product.randomProducts.forEach(randomProduct => {
+                randomProductsHTML += `
+                  <div class="random-product">
+                    <a href="product_detail.php?id=${randomProduct.id}">
+                      <img src="${randomProduct.image}" alt="${randomProduct.name}" class="random-product-image" />
+                      <h3>${randomProduct.name}</h3>
+                      <p>${randomProduct.prix} €</p>
+                    </a>
+                  </div>
+                `;
+              });
+
+              randomProductsHTML += '</div>';
+
+              document.getElementById('product-detail-container').innerHTML += randomProductsHTML;
+            }
+          } else {
+            document.getElementById('product-detail-container').innerHTML = "<p>Produit non trouvé.</p>";
+          }
+        })
+        .catch(error => {
+          console.error('Erreur lors de la récupération des détails du produit:', error);
+          document.getElementById('product-detail-container').innerHTML = "<p>Une erreur est survenue.</p>";
+        });
+    } else {
+      document.getElementById('product-detail-container').innerHTML = "<p>ID de produit manquant.</p>";
+    }
+
     function changeImage(imageSrc, element) {
       document.getElementById('main-image').src = imageSrc;
 

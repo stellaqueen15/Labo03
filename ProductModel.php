@@ -8,6 +8,15 @@ class ProductModel
         $this->db = $database;
     }
 
+    public function getAllProducts()
+    {
+        $query = 'SELECT * FROM produits';
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getProductById($id)
     {
         $sql = "SELECT * FROM produits WHERE id = :id";

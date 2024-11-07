@@ -9,6 +9,11 @@ class ProductController
         $this->model = new ProductModel($database);
     }
 
+    public function getAllProducts()
+    {
+        return $this->model->getAllProducts();
+    }
+
     public function getProductById($id)
     {
         return $this->model->getProductById($id);
