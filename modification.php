@@ -4,41 +4,9 @@ require_once 'database.php';
 require_once 'nettoyage.php';
 session_start();
 
-$userController = new UserController($database);
-
 if (!isset($_SESSION['email'])) {
   header('Location: connexion.php');
   exit();
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $nouveauNom = !empty($_POST['nom']) ? trim(sanitizeString($_POST['nom'])) : $_SESSION['name'];
-  $nouvelEmail = !empty($_POST['email']) ? trim(sanitizeString($_POST['email'])) : $_SESSION['email'];
-  $nouveauMotDePasse = !empty($_POST['password']) ? trim(sanitizeString($_POST['password'])) : $_SESSION['password'];
-
-  if (strlen($nouveauNom) < 3) {
-    $error_message = "Le nom doit comporter au moins 3 caractères.";
-  } elseif (strlen($nouveauMotDePasse) < 8) {
-    $error_message = "Le mot de passe doit comporter au moins 8 caractères.";
-  } elseif (strpos($nouveauMotDePasse, ' ') !== false) {
-    $error_message = "Le mot de passe ne doit pas contenir d'espaces.";
-  } elseif (!filter_var($nouvelEmail, FILTER_VALIDATE_EMAIL)) {
-    $error_message = "L'adresse e-mail n'est pas valide.";
-  } else {
-    $nouveauMotDePasseHash = $_SESSION['password'];
-
-    if ($nouveauMotDePasse) {
-      $nouveauMotDePasseHash = password_hash($nouveauMotDePasse, PASSWORD_DEFAULT);
-    }
-
-    $userController->updateUser($_SESSION['id'], $nouveauNom, $nouvelEmail, $nouveauMotDePasseHash);
-
-    $_SESSION['name'] = $nouveauNom;
-    $_SESSION['email'] = $nouvelEmail;
-
-    header('Location: profil.php');
-    exit();
-  }
 }
 ?>
 
@@ -74,19 +42,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           echo "<p style='color: aqua;'><strong>$error_message</strong></p>";
         }
         ?>
-        <form action="" method="post">
+        <form action="" method="post" id="form-modification">
           <label>Nouveau nom</label><br />
-          <input type="text" id="nom" name="nom" /><br /><br />
+          <input type="text" id="nom" name="nom" value="<?= $_SESSION['name']; ?>" /><br /><br />
           <label>Nouvel email</label><br />
-          <input type="email" id="email" name="email" /><br /><br />
+          <input type="email" id="email" name="email" value="<?= $_SESSION['email']; ?>" /><br /><br />
           <label>Nouveau mot de passe</label><br />
           <input type="password" id="password" name="password" /><br /><br />
           <input type="submit" value="Modifier" />
         </form>
+        <p id="responseMessage"></p>
       </div>
     </div>
   </div>
   <?php include('footer.php'); ?>
 </body>
+<script>
+  document.getElementById('form-modification').addEventListener('submit', function (event) {
+    event.preventDefault(); // Empêche le rechargement de la page
+
+    const nom = document.getElementById('nom').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const data = {
+      nom: nom,
+      email: email,
+      password: password
+    };
+
+    const userId = <?= $_SESSION['id']; ?>;
+    fetch(`http://localhost:4208/Labo03/api/user/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        if (data.success) {
+          document.getElementById('responseMessage').innerText = "Modification réussie !";
+        } else {
+          document.getElementById('responseMessage').innerText = "Une erreur est survenue, veuillez réessayer.";
+        }
+      })
+      .catch(error => {
+        document.getElementById('responseMessage').innerText = "Erreur de connexion, veuillez réessayer.";
+        console.error('Erreur:', error);
+      });
+  });
+
+</script>
 
 </html>
