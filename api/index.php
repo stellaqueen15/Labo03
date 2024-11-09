@@ -16,7 +16,6 @@ if ($method == 'GET' && $uri == '/Labo03/api/produits') {
     echo json_encode($produits);
     exit;
 }
-
 if ($method == 'GET' && preg_match('/^\/Labo03\/api\/produit\/(\d+)$/', $uri, $matches)) {
     $id = $matches[1];
 
@@ -30,9 +29,22 @@ if ($method == 'GET' && preg_match('/^\/Labo03\/api\/produit\/(\d+)$/', $uri, $m
         echo json_encode(["success" => false, "message" => "Produit non trouvé"]);
     }
     exit;
+}
+if ($method == 'GET' && $uri == '/Labo03/api/produitsAle') {
+    header('Content-Type: application/json');
+
+    $productId = isset($_GET['id']) ? intval($_GET['id']) : null;
+
+    $produitsAle = $productController->getRandomProducts(3, $productId);
+
+    echo json_encode($produitsAle);
+    exit;
+}
+if ($method == 'GET' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $matches)) {
+    echo "Mise à jour des détails d'un utilisateur spécifique.";
+    exit;
 } else {
     header('HTTP/1.1 404 Not Found');
     echo json_encode(["error" => "Route non trouvée"]);
     exit;
 }
-

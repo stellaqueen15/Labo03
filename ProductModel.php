@@ -61,10 +61,21 @@ class ProductModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getRandomProducts($limit, $currentProductId)
+    public function getRandomProducts($limit, $currentProductId = null)
     {
-        $stmt = $this->db->prepare("SELECT * FROM produits WHERE id != :id ORDER BY RAND() LIMIT :limit");
-        $stmt->bindParam(':id', $currentProductId, PDO::PARAM_INT);
+        $sql = "SELECT * FROM produits";
+
+        if ($currentProductId) {
+            $sql .= " WHERE id != :id";
+        }
+
+        $sql .= " ORDER BY RAND() LIMIT :limit";
+        $stmt = $this->db->prepare($sql);
+
+        if ($currentProductId) {
+            $stmt->bindParam(':id', $currentProductId, PDO::PARAM_INT);
+        }
+
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
