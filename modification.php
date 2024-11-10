@@ -42,58 +42,61 @@ if (!isset($_SESSION['email'])) {
           echo "<p style='color: aqua;'><strong>$error_message</strong></p>";
         }
         ?>
-        <form action="" method="post" id="form-modification">
+        <form action="" method="POST" id="form-modification">
           <label>Nouveau nom</label><br />
           <input type="text" id="nom" name="nom" value="<?= $_SESSION['name']; ?>" /><br /><br />
           <label>Nouvel email</label><br />
           <input type="email" id="email" name="email" value="<?= $_SESSION['email']; ?>" /><br /><br />
           <label>Nouveau mot de passe</label><br />
           <input type="password" id="password" name="password" /><br /><br />
-          <input type="submit" value="Modifier" />
+          <input type="submit" id="submit" value="Modifier" />
         </form>
-        <p id="responseMessage"></p>
       </div>
     </div>
   </div>
   <?php include('footer.php'); ?>
 </body>
 <script>
-  document.getElementById('form-modification').addEventListener('submit', function (event) {
-    event.preventDefault(); // Empêche le rechargement de la page
-
-    const nom = document.getElementById('nom').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    const data = {
-      nom: nom,
-      email: email,
-      password: password
-    };
+  document.getElementById('submit').addEventListener('click', (event) => {
+    event.preventDefault();
 
     const userId = <?= $_SESSION['id']; ?>;
+
+    const formData = new FormData(document.getElementById('form-modification'));
+
+    const data = {
+      nom: formData.get('nom'),
+      email: formData.get('email'),
+      password: formData.get('password')
+    };
+
     fetch(`http://localhost:4208/Labo03/api/user/${userId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data)
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP : ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
-        console.log(data);
+        console.log('Réponse du serveur :', data);
+
         if (data.success) {
-          document.getElementById('responseMessage').innerText = "Modification réussie !";
+          alert(data.message);
+          window.location.href = 'profil.php';
         } else {
-          document.getElementById('responseMessage').innerText = "Une erreur est survenue, veuillez réessayer.";
+          alert(`Erreur : ${data.message}`);
         }
       })
       .catch(error => {
-        document.getElementById('responseMessage').innerText = "Erreur de connexion, veuillez réessayer.";
-        console.error('Erreur:', error);
+        console.error('Erreur lors de la soumission du formulaire :', error);
       });
   });
-
 </script>
 
 </html>

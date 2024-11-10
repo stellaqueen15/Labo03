@@ -1,7 +1,9 @@
 <?php
+require_once '../UserController.php';
 require_once '../ProductController.php';
 require_once '../ProductView.php';
 require_once '../database.php';
+require_once '../nettoyage.php';
 session_start();
 
 // Récupère l'URI et la méthode HTTP
@@ -10,13 +12,16 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Instancie le contrôleur
 $productController = new ProductController($database);
+$userController = new UserController($database);
 
+//GET pour avoir les produits
 if ($method == 'GET' && $uri == '/Labo03/api/produits') {
     header('Content-Type: application/json');
     $produits = $productController->getAllProducts();
     echo json_encode($produits);
     exit;
 }
+//GET pour avoir iun produit selon son id
 if ($method == 'GET' && preg_match('/^\/Labo03\/api\/produit\/(\d+)$/', $uri, $matches)) {
     $id = $matches[1];
 
@@ -31,6 +36,7 @@ if ($method == 'GET' && preg_match('/^\/Labo03\/api\/produit\/(\d+)$/', $uri, $m
     }
     exit;
 }
+//GET pour avoir les produits aléatoires
 if ($method == 'GET' && $uri == '/Labo03/api/produitsAle') {
     header('Content-Type: application/json');
 
@@ -41,31 +47,35 @@ if ($method == 'GET' && $uri == '/Labo03/api/produitsAle') {
     echo json_encode($produitsAle);
     exit;
 }
-if ($_SERVER['REQUEST_METHOD'] == 'PUT' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $matches)) {
+//PUT pour modifier un utilisateur
+if ($method == 'PUT' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $matches)) {
     $userId = $matches[1];
-
-    if (!isset($_SESSION['id']) || $_SESSION['id'] != $userId) {
-        echo json_encode(['success' => false, 'message' => 'Accès non autorisé']);
-        exit();
-    }
 
     $data = json_decode(file_get_contents('php://input'), true);
 
+    if (!$data) {
+        echo json_encode(['success' => false, 'message' => 'Données invalides ou absentes.']);
+        exit();
+    }
+
     $nouveauNom = !empty($data['nom']) ? trim(sanitizeString($data['nom'])) : $_SESSION['name'];
     $nouvelEmail = !empty($data['email']) ? trim(sanitizeString($data['email'])) : $_SESSION['email'];
-    $nouveauMotDePasse = !empty($data['password']) ? trim(sanitizeString($data['password'])) : $_SESSION['password'];
+    $nouveauMotDePasse = !empty($data['password']) ? trim(sanitizeString($data['password'])) : null;
 
     if (strlen($nouveauNom) < 3) {
-        echo json_encode(['success' => false, 'message' => 'Le nom doit comporter au moins 3 caractères.']);
+        echo json_encode(['success' => false, 'message' => "Le nom doit comporter au moins 3 caractères."]);
         exit();
-    } elseif (strlen($nouveauMotDePasse) < 8 && !empty($nouveauMotDePasse)) {
-        echo json_encode(['success' => false, 'message' => 'Le mot de passe doit comporter au moins 8 caractères.']);
+    }
+    if (!empty($nouveauMotDePasse) && strlen($nouveauMotDePasse) < 8) {
+        echo json_encode(['success' => false, 'message' => "Le mot de passe doit comporter au moins 8 caractères."]);
         exit();
-    } elseif (strpos($nouveauMotDePasse, ' ') !== false) {
-        echo json_encode(['success' => false, 'message' => 'Le mot de passe ne doit pas contenir d\'espaces.']);
+    }
+    if (!empty($nouveauMotDePasse) && strpos($nouveauMotDePasse, ' ') !== false) {
+        echo json_encode(['success' => false, 'message' => "Le mot de passe ne doit pas contenir d'espaces."]);
         exit();
-    } elseif (!filter_var($nouvelEmail, FILTER_VALIDATE_EMAIL)) {
-        echo json_encode(['success' => false, 'message' => 'L\'adresse e-mail n\'est pas valide.']);
+    }
+    if (!filter_var($nouvelEmail, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => "L'adresse e-mail n'est pas valide."]);
         exit();
     }
 
@@ -76,7 +86,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT' && preg_match('/^\/Labo03\/api\/user\/(\
 
     $userController->updateUser($userId, $nouveauNom, $nouvelEmail, $nouveauMotDePasseHash);
 
-    echo json_encode(['success' => true, 'message' => 'Mise à jour réussie']);
+    $_SESSION['name'] = $nouveauNom;
+    $_SESSION['email'] = $nouvelEmail;
+
+    // Réponse de succès
+    echo json_encode(['success' => true, 'message' => "Mise à jour réussie."]);
+    exit();
+}
+// DELETE
+if ($method == 'DELETE' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $matches)) {
+    $userId = $matches[1];
+    if ($userController->deleteUser($userId)) {
+        echo json_encode(['success' => true, 'message' => 'Utilisateur supprimé']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Erreur de suppression']);
+    }
+    exit();
+}
+// POST pour ajouter un utilisateur
+if ($method == 'POST' && $uri == '/Labo03/api/user') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $name = sanitizeString($data['name']);
+    $email = sanitizeString($data['email']);
+    $password = password_hash(sanitizeString($data['password']), PASSWORD_DEFAULT);
+    if ($userController->createUser($name, $email, $password)) {
+        echo json_encode(['success' => true, 'message' => 'Utilisateur ajouté']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Erreur d\'ajout']);
+    }
     exit();
 } else {
     header('HTTP/1.1 404 Not Found');
