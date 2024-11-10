@@ -14,12 +14,9 @@ $password_user = "";
 $message = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['nom']))
-        $nom = trim(sanitizeString($_POST['nom']));
-    if (isset($_POST['email']))
-        $email = trim(sanitizeString($_POST['email']));
-    if (isset($_POST['password']))
-        $password_user = trim(sanitizeString($_POST['password']));
+    $nom = isset($_POST['nom']) ? sanitizeString($_POST['nom']) : '';
+    $email = isset($_POST['email']) ? sanitizeString($_POST['email']) : '';
+    $password_user = isset($_POST['password']) ? sanitizeString($_POST['password']) : '';
 
     if (empty($nom) || empty($email) || empty($password_user)) {
         $error_message = "Tous les champs sont obligatoires.";
@@ -32,24 +29,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = "L'adresse e-mail n'est pas valide.";
     } else {
-        $hash_password = password_hash($password_user, PASSWORD_DEFAULT);
-
-        try {
-            $userController->createUser($nom, $email, $hash_password);
-
-            header("Location: connexion.php");
-            exit();
-        } catch (PDOException $e) {
-            if ($e->getCode() == 23000) {
-                $error_message = "Cet e-mail est déjà utilisé.";
-            } else {
-                $error_message = "Une erreur s'est produite : " . $e->getMessage();
-            }
-        }
+        $data = [
+            'name' => $nom,
+            'email' => $email,
+            'password' => $password_user,
+        ];
+        $jsonData = json_encode($data);
+        ?>
+        <script>
+            fetch('http://localhost:4208/Labo03/api/user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: '<?= $jsonData; ?>'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = 'connexion.php';
+                    } else {
+                        document.getElementById('error-message').innerText = data.message;
+                    }
+                })
+                .catch(error => console.error('Erreur lors de l\'inscription:', error));
+        </script>
+        <?php
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 

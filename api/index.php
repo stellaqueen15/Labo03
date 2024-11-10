@@ -21,7 +21,7 @@ if ($method == 'GET' && $uri == '/Labo03/api/produits') {
     echo json_encode($produits);
     exit;
 }
-//GET pour avoir iun produit selon son id
+//GET pour avoir un produit selon son id
 if ($method == 'GET' && preg_match('/^\/Labo03\/api\/produit\/(\d+)$/', $uri, $matches)) {
     $id = $matches[1];
 
