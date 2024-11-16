@@ -80,5 +80,23 @@ class ProductModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getSizesByProductId($productId)
+    {
+        // Requête pour ne récupérer que les tailles
+        $query = $this->db->prepare("SELECT taille FROM quantites_par_taille WHERE produit_id = :productId");
+        $query->execute([':productId' => $productId]);
+
+        // Récupérer les tailles sous forme de tableau
+        $tailles = $query->fetchAll(PDO::FETCH_COLUMN);
+
+        // Vérifier s'il y a des tailles
+        if (!$tailles) {
+            return null;
+        }
+
+        return $tailles;
+    }
+
 }
 ?>

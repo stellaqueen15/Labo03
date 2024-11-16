@@ -36,6 +36,21 @@ if ($method == 'GET' && preg_match('/^\/Labo03\/api\/produit\/(\d+)$/', $uri, $m
     }
     exit;
 }
+//GET pour avoir les tailles des produits
+if ($method == 'GET' && preg_match('/^\/Labo03\/api\/taille\/(\d+)$/', $uri, $matches)) {
+    $productId = $matches[1];
+    header('Content-Type: application/json');
+
+    // Appeler la méthode pour récupérer uniquement les tailles
+    $tailles = $productController->getSizesByProductId($productId);
+
+    if ($tailles) {
+        echo json_encode($tailles);
+    } else {
+        echo json_encode(["success" => false, "message" => "Aucune taille trouvée pour ce produit"]);
+    }
+    exit;
+}
 //GET pour avoir les produits aléatoires
 if ($method == 'GET' && $uri == '/Labo03/api/produitsAle') {
     header('Content-Type: application/json');

@@ -28,5 +28,10 @@ class ProductController
     {
         return $this->model->getFilteredProducts($type, $couleur, $taille, $prix_min, $prix_max);
     }
+
+    public function getSizesByProductId($productId)
+    {
+        return $this->model->getSizesByProductId($productId);
+    }
 }
 ?>

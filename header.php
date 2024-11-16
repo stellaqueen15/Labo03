@@ -11,6 +11,8 @@ $isLoggedIn = isset($_SESSION['email']);
         <?php if ($isLoggedIn): ?>
             <a href="profil.php">Profil</a>
             <div class="header-separateur"></div>
+            <a href="panier.php"><img src="./images/chariot-de-chariot.png" alt="" style="width: 36px;"></a>
+            <div class="header-separateur"></div>
             <a href="deconnexion.php">Déconnexion</a>
         <?php else: ?>
             <a href="inscription.php">S'identifier</a>
