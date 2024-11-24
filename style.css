@@ -549,6 +549,128 @@ menu > a:hover {
   text-align: center;
 }
 
+.boutonAjouterPanier {
+  background: linear-gradient(
+    -90deg,
+    rgb(1, 205, 254) 0%,
+    rgb(145, 233, 255) 100%
+  );
+  font-size: 16px;
+  border: 2px solid black;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.boutonAjouterPanier:hover {
+  background: linear-gradient(
+    -90deg,
+    rgb(10, 180, 223) 0%,
+    rgb(99, 193, 217) 100%
+  );
+}
+
+/* --------------------------------------------------   PANIER  ---------------------------------------------------------------*/
+.liste-panier {
+  list-style: none;
+  margin-left: -41px;
+}
+
+.fenetre-panier {
+  width: 900px;
+  border: 2px solid black;
+  background: linear-gradient(
+    360deg,
+    rgb(255, 113, 206) 0%,
+    rgb(214, 94, 241) 100%
+  );
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+  margin: 20px auto;
+}
+
+.barre-panier {
+  background-color: rgb(141, 28, 186);
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+.boutons-fenetre {
+  display: flex;
+  gap: 10px;
+}
+
+.boutons-fenetre-panier span {
+  cursor: pointer;
+  background-color: rgb(1, 205, 254);
+  color: rgb(0, 0, 0);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.boutons-fenetre-panier span:hover {
+  background-color: rgb(74, 217, 253);
+}
+
+.boutons-fenetre-panier button {
+  cursor: pointer;
+  background-color: rgb(1, 205, 254);
+  color: rgb(0, 0, 0);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: none;
+  height: 21px;
+  font-weight: 600;
+}
+
+.boutons-fenetre-panier button:hover {
+  background-color: rgb(74, 217, 253);
+}
+
+.prix-total {
+  background-color: rgb(141, 28, 186);
+  padding: 5px;
+  text-align: center;
+  color: white;
+  font-weight: 600;
+}
+
+.boutonValiderPanier {
+  background: linear-gradient(
+    -90deg,
+    rgb(1, 205, 254) 0%,
+    rgb(145, 233, 255) 100%
+  );
+  font-size: 16px;
+  border: 2px solid black;
+  padding: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.boutonValiderPanier:hover {
+  background: linear-gradient(
+    -90deg,
+    rgb(10, 180, 223) 0%,
+    rgb(99, 193, 217) 100%
+  );
+}
+
+.conteneur {
+  display: flex;
+  align-items: center;
+}
+
+.conteneur p {
+  margin-left: 10px;
+}
+
+.conteneur-panier {
+  text-align: center;
+}
+
 /* --------------------------------------------------   FOOTER  ---------------------------------------------------------------*/
 #newsletter-section,
 footer {
